@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phân tích Chất lượng ĐTV — GĐKH VNPT</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="data.js"></script>
+<style>
+:root {
+  --bg:      #EEF6FF;
+  --card:    #FFFFFF;
+  --primary: #173FAC;
+  --accent:  #286EF0;
+  --teal:    #12B3A6;
+  --text:    #193A8A;
+  --muted:   #6B84B8;
+  --danger:  #DC2626;
+  --warning: #D97706;
+  --success: #12B3A6;
+  --info:    #286EF0;
+  --border:  #D9EAFF;
+  --shadow:  0 6px 24px -8px rgba(23,63,172,.18);
+  --radius:  12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.5}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ── NAV ── */
+.nav{background:rgba(255,255,255,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--primary);display:flex;align-items:center;gap:0;padding:0 16px;height:52px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);box-shadow:0 2px 16px -4px rgba(23,63,172,.10)}
+.nav-brand{font-weight:800;font-size:16px;margin-right:auto;letter-spacing:.3px;color:var(--text)}
+.nav-brand span{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:10px;background:var(--primary);color:#fff;font-size:13px;font-weight:900;margin-right:8px}
+.nav-tabs{display:flex;height:100%}
+.nav-tab{background:none;border:none;color:var(--muted);padding:0 16px;cursor:pointer;height:100%;font-size:13px;font-weight:600;border-bottom:3px solid transparent;transition:all .2s}
+.nav-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.nav-tab:hover{color:var(--primary);background:var(--bg)}
+
+/* ── LAYOUT ── */
+.page{max-width:1280px;margin:0 auto;padding:20px 16px}
+.section-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';width:4px;height:18px;background:linear-gradient(to bottom,var(--primary),var(--teal));border-radius:2px;display:inline-block}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.kpi{padding:16px 20px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow)}
+.kpi-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px}
+.kpi-value{font-size:28px;font-weight:800;line-height:1.1}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.kpi.danger  .kpi-value{color:var(--danger)}
+.kpi.warning .kpi-value{color:var(--warning)}
+.kpi.success .kpi-value{color:var(--teal)}
+.kpi.primary .kpi-value{color:var(--primary)}
+.kpi.primary{border-top:3px solid var(--primary)}
+.kpi.success{border-top:3px solid var(--teal)}
+.kpi.danger {border-top:3px solid var(--danger)}
+.kpi.warning{border-top:3px solid var(--warning)}
+
+/* ── GRID ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+@media(max-width:900px){.grid-2{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.grid-3{grid-template-columns:1fr}}
+
+/* ── CHART CONTAINER ── */
+.chart-wrap{position:relative;height:320px}
+.chart-wrap.tall{height:420px}
+.chart-wrap.short{height:220px}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto;border-radius:var(--radius)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--primary);color:#fff;padding:9px 12px;text-align:left;font-weight:600;font-size:12px;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:#EEF6FF}
+tr:last-child td{border-bottom:none}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge.danger {background:#fee2e2;color:#B91C1C}
+.badge.warning{background:#fef3c7;color:#92400E}
+.badge.success{background:#ccfbf1;color:#0F766E}
+.badge.info   {background:#dbeafe;color:#1D4ED8}
+.badge.muted  {background:#EEF6FF;color:var(--primary)}
+.badge.remind {background:#dbeafe;color:#1D4ED8;border:1px solid #BFDBFE}
+
+/* ── PROGRESS BAR ── */
+.progress-row{margin:4px 0}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:2px}
+.progress-bg{background:#D9EAFF;border-radius:20px;height:7px;overflow:hidden}
+.progress-fill{height:100%;border-radius:20px;transition:width .4s}
+.fill-danger {background:var(--danger)}
+.fill-warning{background:var(--warning)}
+.fill-success{background:var(--teal)}
+.fill-info   {background:var(--accent)}
+
+/* ── SEARCH / FILTER ── */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.search-input{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);font-size:13px;width:240px;outline:none;color:var(--text)}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(40,110,240,.12)}
+.select-input{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);font-size:13px;cursor:pointer;outline:none;color:var(--text)}
+.select-input:focus{border-color:var(--accent)}
+.btn{padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);font-size:12px;font-weight:600;cursor:pointer;color:var(--primary);transition:all .15s}
+.btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ── DATASET TOGGLE ── */
+.ds-toggle{display:flex;background:#D9EAFF;border-radius:10px;padding:3px;gap:2px}
+.ds-btn{padding:6px 20px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;background:transparent;color:var(--primary)}
+.ds-btn.active{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(23,63,172,.25)}
+
+/* ── AGENT CARD ── */
+.agent-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}
+.agent-avatar{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0;box-shadow:0 4px 12px rgba(23,63,172,.3)}
+.agent-meta h2{font-size:18px;font-weight:800;margin-bottom:2px}
+.agent-meta p{font-size:12px;color:var(--muted)}
+.back-btn{background:#EEF6FF;border:1.5px solid var(--border);color:var(--primary);font-size:13px;cursor:pointer;padding:6px 14px;border-radius:8px;display:inline-flex;align-items:center;gap:4px;margin-bottom:12px;font-weight:600;transition:all .15s}
+.back-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ── TRAINING CARD ── */
+.training-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.tc{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);transition:box-shadow .2s}
+.tc:hover{box-shadow:0 8px 32px -8px rgba(23,63,172,.22)}
+.tc-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.tc-id{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-radius:8px;padding:4px 10px;font-size:13px;font-weight:800;flex-shrink:0}
+.tc-label{font-size:14px;font-weight:700;flex:1;color:var(--text)}
+.tc-pct{font-size:18px;font-weight:800;margin-left:auto}
+.tc-pct.danger {color:var(--danger)}
+.tc-pct.warning{color:var(--warning)}
+.tc-pct.success{color:var(--teal)}
+.tc-tip{font-size:12px;color:var(--muted);margin:6px 0;line-height:1.5}
+.tc-example{font-size:12px;font-style:italic;color:var(--primary);margin:6px 0;padding:6px 10px;background:#EEF6FF;border-left:3px solid var(--accent);border-radius:4px}
+.learn-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 16px;background:var(--teal);color:#fff;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none;transition:background .2s}
+.learn-btn:hover{background:var(--primary);text-decoration:none}
+
+/* ── CALLS LIST ── */
+.call-item{border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;margin:6px 0;display:flex;align-items:flex-start;gap:12px}
+.call-item.negative{border-color:#FCA5A5;background:#FFF5F5}
+.call-viols{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.call-field{font-size:11px;color:var(--muted)}
+.call-summary{font-size:12px;color:var(--text);margin-top:4px}
+
+/* ── SORT INDICATOR ── */
+.sortable{cursor:pointer;user-select:none}
+.sortable:hover{background:rgba(255,255,255,.15)}
+.sort-icon{margin-left:4px;opacity:.6}
+
+/* ── TOP ROW RANK ── */
+.rank-1 td:first-child{border-left:4px solid var(--danger);padding-left:8px}
+.rank-2 td:first-child{border-left:4px solid var(--warning);padding-left:8px}
+.rank-3 td:first-child{border-left:4px solid #D4AF37;padding-left:8px}
+
+/* ── VIOLATION BAR (horizontal) ── */
+.vbar-row{display:flex;align-items:center;gap:8px;padding:4px 0}
+.vbar-label{width:130px;font-size:12px;text-align:right;color:var(--muted);flex-shrink:0}
+.vbar-track{flex:1;background:#D9EAFF;border-radius:20px;height:12px;overflow:hidden}
+.vbar-fill{height:100%;border-radius:20px;transition:width .5s}
+.vbar-val{width:60px;font-size:12px;font-weight:700;flex-shrink:0}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+
+/* ── SCORE PILL ── */
+.score-pill{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:700}
+.sp-danger {background:#fee2e2;color:#B91C1C}
+.sp-warning{background:#fef3c7;color:#92400E}
+.sp-success{background:#ccfbf1;color:#0F766E}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ── NAV ── -->
+<nav class="nav">
+  <span class="nav-brand"><span>ĐTV</span>Phân tích Chất lượng ĐTV</span>
+  <div class="nav-tabs">
+    <button class="nav-tab" :class="{active:tab==='dashboard'}" @click="tab='dashboard';agentDetail=null">Dashboard</button>
+    <button class="nav-tab" :class="{active:tab==='agents'}"    @click="tab='agents';agentDetail=null">Danh sách ĐTV</button>
+    <button class="nav-tab" :class="{active:tab==='training'}"  @click="tab='training';agentDetail=null">Chiến lược đào tạo</button>
+  </div>
+</nav>
+
+<!-- ── DATASET TOGGLE ── -->
+<div style="background:#EEF6FF;padding:10px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)">
+  <span style="font-size:12px;font-weight:700;color:var(--muted)">TỔNG ĐÀI:</span>
+  <div class="ds-toggle">
+    <button class="ds-btn" :class="{active:dataset==='cntt'}" @click="switchDataset('cntt')">18001260 CNTT ({{cnttData.totalCalls}} cuộc)</button>
+    <button class="ds-btn" :class="{active:dataset==='brcd'}" @click="switchDataset('brcd')">18001166 BRCĐ ({{brcdData.totalCalls}} cuộc)</button>
+  </div>
+  <span style="font-size:11px;color:var(--muted);margin-left:auto">Kỳ: {{DATA.meta.period}} · Cập nhật: {{DATA.meta.generatedAt}}</span>
+</div>
+
+<!-- ═══════════════════════ AGENT DETAIL ═══════════════════════ -->
+<div v-if="agentDetail" class="page">
+  <button class="back-btn" @click="agentDetail=null">← Quay lại danh sách</button>
+  <div class="agent-header">
+    <div class="agent-avatar">{{agentDetail.name.split(' ').pop()[0]}}</div>
+    <div class="agent-meta">
+      <h2>{{agentDetail.name}}</h2>
+      <p>{{agentDetail.accountId}} · {{agentDetail.unit}} · {{agentDetail.location}}</p>
+      <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+        <span class="badge" :class="violClass(agentDetail.totalViolations, agentDetail.totalCalls)">{{agentDetail.totalViolations}} vi phạm / {{agentDetail.totalCalls}} cuộc</span>
+        <span class="badge success" v-if="agentDetail.scoreNV">NV {{agentDetail.scoreNV.toFixed(1)}}</span>
+        <span class="badge info"    v-if="agentDetail.scoreTD">TĐ {{agentDetail.scoreTD.toFixed(1)}}</span>
+        <span class="badge muted"   v-if="agentDetail.scoreTNTN">TNTN {{agentDetail.scoreTNTN.toFixed(1)}}</span>
+        <span class="badge warning" v-if="agentDetail.scoreKNGT">KNGT {{agentDetail.scoreKNGT.toFixed(1)}}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Radar -->
+    <div class="card">
+      <div style="font-weight:700;color:var(--primary);margin-bottom:12px">Điểm 4 nhóm tiêu chí</div>
+      <div class="chart-wrap short"><canvas :id="'radar_'+(agentDetail.accountId||agentDetail.name||'agent').replace(/[^a-z0-9]/gi,'_')"></canvas></div>
+    </div>
+    <!-- Top violations bar -->
+    <div class="card">
+      <div style="font-weight:700;color:var(--primary);margin-bottom:12px">Vi phạm theo tiêu chí</div>
+      <div v-for="c in agentCriteriaRows(agentDetail)" :key="c.id" class="vbar-row">
+        <span class="vbar-label" :title="c.label">{{c.id}}</span>
+        <div class="vbar-track">
+          <div class="vbar-fill" :class="c.pct>=30?'fill-danger':c.pct>=10?'fill-warning':'fill-info'" :style="{width:Math.min(c.pct,100)+'%'}"></div>
+        </div>
+        <span class="vbar-val" :class="c.pct>=30?'sp-danger':c.pct>=10?'sp-warning':'sp-success'">{{c.pct.toFixed(0)}}%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Violation table -->
+  <div class="card" style="margin-bottom:18px">
+    <div style="font-weight:700;color:var(--primary);margin-bottom:12px">Chi tiết vi phạm từng tiêu chí</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Tiêu chí</th><th>Tên tiêu chí</th><th>Nhóm</th>
+          <th style="text-align:center">Vi phạm</th><th style="text-align:center">Áp dụng</th><th style="text-align:center">Tỷ lệ</th>
+          <th>Lưu ý</th><th>Học ngay</th>
+        </tr></thead>
+        <tbody>
+          <tr v-for="c in agentViolRows(agentDetail)" :key="c.id">
+            <td><code>{{c.id}}</code> <span class="badge remind" v-if="c.reminder">Nhắc nhở</span></td>
+            <td>{{c.label}}</td>
+            <td><span class="badge muted">{{c.group}}</span></td>
+            <td style="text-align:center;font-weight:700" :class="c.pct>=30?'sp-danger':c.pct>=10?'sp-warning':''">{{c.viol}}</td>
+            <td style="text-align:center">{{c.appl}}</td>
+            <td style="text-align:center">
+              <span class="score-pill" :class="c.pct>=30?'sp-danger':c.pct>=10?'sp-warning':'sp-success'">{{c.pct.toFixed(1)}}%</span>
+            </td>
+            <td style="font-size:11px;color:var(--muted);max-width:200px">{{c.tip}}</td>
+            <td><a v-if="c.learnUrl" :href="c.learnUrl" target="_blank" class="learn-btn" style="font-size:11px;padding:4px 10px">📚 Học</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Calls list (CNTT only) -->
+  <div class="card" v-if="dataset==='cntt' && agentDetail.calls && agentDetail.calls.length">
+    <div style="font-weight:700;color:var(--primary);margin-bottom:12px">Danh sách cuộc gọi ({{agentDetail.calls.length}} cuộc)</div>
+    <div v-for="(call,i) in agentDetail.calls.slice(0,30)" :key="i" class="call-item" :class="{negative:call.satisfaction==='không hài lòng'}">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge" :class="call.satisfaction==='hài lòng'?'success':call.satisfaction==='không hài lòng'?'danger':'muted'">
+            {{call.satisfaction==='hài lòng'?'😊 Hài lòng':call.satisfaction==='không hài lòng'?'😞 Không HL':'—'}}
+          </span>
+          <span class="call-field">{{call.time}}</span>
+          <span class="call-field" v-if="call.duration">⏱ {{call.duration}}s</span>
+          <a v-if="call.url" :href="call.url" target="_blank" style="font-size:11px;margin-left:auto">🔊 Nghe lại</a>
+        </div>
+        <div class="call-viols" v-if="call.violations && call.violations.length">
+          <span class="badge danger" v-for="v in call.violations" :key="v">{{v}}</span>
+        </div>
+        <div class="call-summary" v-if="call.summary">{{call.summary}}</div>
+        <div class="call-field" style="margin-top:4px" v-if="call.negativeMarkers">⚠ {{call.negativeMarkers}}</div>
+      </div>
+    </div>
+    <div v-if="agentDetail.calls.length>30" style="text-align:center;padding:12px;font-size:12px;color:var(--muted)">
+      … và {{agentDetail.calls.length-30}} cuộc gọi khác
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+<div v-else-if="tab==='dashboard'" class="page">
+  <div class="kpi-row">
+    <div class="kpi primary">
+      <div class="kpi-label">Tổng cuộc gọi</div>
+      <div class="kpi-value">{{activeData.totalCalls.toLocaleString('vi')}}</div>
+      <div class="kpi-sub">đã phân tích</div>
+    </div>
+    <div class="kpi success">
+      <div class="kpi-label">Hài lòng</div>
+      <div class="kpi-value">{{activeData.satRate.toFixed(1)}}%</div>
+      <div class="kpi-sub">{{activeData.satCount.toLocaleString('vi')}} cuộc</div>
+    </div>
+    <div class="kpi danger">
+      <div class="kpi-label">Không hài lòng</div>
+      <div class="kpi-value">{{(activeData.notSatCount/activeData.totalCalls*100).toFixed(1)}}%</div>
+      <div class="kpi-sub">{{activeData.notSatCount.toLocaleString('vi')}} cuộc</div>
+    </div>
+    <div class="kpi warning">
+      <div class="kpi-label">ĐTV dưới 95 điểm</div>
+      <div class="kpi-value">{{belowThreshold}}</div>
+      <div class="kpi-sub">/ {{activeData.agents.length}} ĐTV</div>
+    </div>
+    <div class="kpi danger">
+      <div class="kpi-label">Vi phạm nhiều nhất</div>
+      <div class="kpi-value">{{topCriteria[0]?.pct.toFixed(0)}}%</div>
+      <div class="kpi-sub">{{topCriteria[0]?.id}} — {{criteriaMap[topCriteria[0]?.id]?.label}}</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Top criteria violations -->
+    <div class="card">
+      <div class="section-title">Top tiêu chí vi phạm cao nhất</div>
+      <div class="chart-wrap"><canvas id="barCriteria"></canvas></div>
+    </div>
+    <!-- Satisfaction donut -->
+    <div class="card">
+      <div class="section-title">Đánh giá hài lòng</div>
+      <div class="chart-wrap short" style="display:flex;align-items:center;justify-content:center">
+        <canvas id="donutSat" style="max-width:220px;max-height:220px"></canvas>
+      </div>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:12px">
+        <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:var(--success)">{{activeData.satRate.toFixed(1)}}%</div><div style="font-size:11px;color:var(--muted)">Hài lòng</div></div>
+        <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:var(--danger)">{{(activeData.notSatCount/activeData.totalCalls*100).toFixed(1)}}%</div><div style="font-size:11px;color:var(--muted)">Không hài lòng</div></div>
+        <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:var(--muted)">{{(activeData.naCount/activeData.totalCalls*100).toFixed(1)}}%</div><div style="font-size:11px;color:var(--muted)">Không đánh giá</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top agents -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="section-title">Top 15 ĐTV vi phạm nhiều nhất</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Họ tên ĐTV</th><th>Đơn vị</th>
+          <th style="text-align:center">Cuộc gọi</th>
+          <th style="text-align:center">Vi phạm</th>
+          <th style="text-align:center">Vi phạm/cuộc</th>
+          <th>Lỗi nổi bật</th>
+          <th style="text-align:center">Điểm TB</th>
+        </tr></thead>
+        <tbody>
+          <tr v-for="(a,i) in topAgents" :key="a.accountId" :class="'rank-'+(i+1)">
+            <td style="font-weight:700;color:var(--muted)">{{i+1}}</td>
+            <td><button style="background:none;border:none;color:var(--accent);cursor:pointer;font-weight:600;font-size:13px;text-align:left" @click="openAgent(a)">{{a.name}}</button></td>
+            <td><span class="badge muted">{{a.location}}</span></td>
+            <td style="text-align:center">{{a.totalCalls}}</td>
+            <td style="text-align:center;font-weight:700;color:var(--danger)">{{a.totalViolations}}</td>
+            <td style="text-align:center">
+              <span class="score-pill" :class="(a.totalViolations/a.totalCalls)>=0.5?'sp-danger':(a.totalViolations/a.totalCalls)>=0.2?'sp-warning':'sp-success'">
+                {{(a.totalViolations/a.totalCalls).toFixed(2)}}
+              </span>
+            </td>
+            <td>
+              <div style="display:flex;gap:4px;flex-wrap:wrap">
+                <span class="badge danger" v-for="c in a.topViolations.slice(0,3)" :key="c">{{c}}</span>
+              </div>
+            </td>
+            <td style="text-align:center">
+              <span class="score-pill" :class="avgScore(a)<8.0?'sp-danger':avgScore(a)<9.0?'sp-warning':'sp-success'">
+                {{avgScore(a).toFixed(1)}}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Group-level violation summary -->
+  <div class="card">
+    <div class="section-title">Tỷ lệ vi phạm theo nhóm tiêu chí</div>
+    <div class="grid-3" style="margin-bottom:0">
+      <div v-for="g in groupStats" :key="g.group">
+        <div style="font-weight:700;margin-bottom:8px;font-size:13px">{{g.group}}</div>
+        <div v-for="c in g.items" :key="c.id" class="progress-row">
+          <div class="progress-label">
+            <span :title="c.label">{{c.id}}</span>
+            <span :class="c.pct>=30?'sp-danger':c.pct>=10?'sp-warning':''" style="font-weight:700">{{c.pct.toFixed(1)}}%</span>
+          </div>
+          <div class="progress-bg"><div class="progress-fill" :class="c.pct>=30?'fill-danger':c.pct>=10?'fill-warning':'fill-success'" :style="{width:Math.min(c.pct,100)+'%'}"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ AGENTS LIST ═══════════════════════ -->
+<div v-else-if="tab==='agents' && !agentDetail" class="page">
+  <div class="toolbar">
+    <input class="search-input" v-model="search" placeholder="🔍 Tìm tên ĐTV…">
+    <select class="select-input" v-model="filterLoc">
+      <option value="">Tất cả khu vực</option>
+      <option value="HAN">Hà Nội</option>
+      <option value="DNG">Đà Nẵng</option>
+      <option value="HCM">HCM</option>
+      <option value="KHÁC">Khác</option>
+    </select>
+    <select class="select-input" v-model="filterViola">
+      <option value="">Tất cả mức vi phạm</option>
+      <option value="high">Vi phạm cao (≥0.5/cuộc)</option>
+      <option value="mid">Vi phạm trung bình</option>
+      <option value="low">Vi phạm thấp</option>
+    </select>
+    <span style="font-size:12px;color:var(--muted);margin-left:auto">{{filteredAgents.length}} / {{activeData.agents.length}} ĐTV</span>
+  </div>
+  <div class="table-wrap card" style="padding:0">
+    <table>
+      <thead><tr>
+        <th class="sortable" @click="sortBy('name')">Họ tên ĐTV {{sortIcon('name')}}</th>
+        <th>Đơn vị</th>
+        <th class="sortable" style="text-align:center" @click="sortBy('totalCalls')">Cuộc {{sortIcon('totalCalls')}}</th>
+        <th class="sortable" style="text-align:center" @click="sortBy('totalViolations')">Vi phạm {{sortIcon('totalViolations')}}</th>
+        <th>NV</th><th>TĐ</th><th>TNTN</th><th>KNGT</th>
+        <th>Lỗi chính</th>
+        <th></th>
+      </tr></thead>
+      <tbody>
+        <tr v-for="a in filteredAgents" :key="a.accountId">
+          <td style="font-weight:600">{{a.name}}</td>
+          <td><span class="badge muted">{{a.location}}</span></td>
+          <td style="text-align:center">{{a.totalCalls}}</td>
+          <td style="text-align:center">
+            <span class="score-pill" :class="violClass2(a)">{{a.totalViolations}}</span>
+          </td>
+          <td><div class="progress-bg" style="height:8px;width:70px"><div class="progress-fill fill-success" :style="{width:a.scoreNV*10+'%'}"></div></div></td>
+          <td><div class="progress-bg" style="height:8px;width:70px"><div class="progress-fill fill-info"    :style="{width:a.scoreTD*10+'%'}"></div></div></td>
+          <td><div class="progress-bg" style="height:8px;width:70px"><div class="progress-fill fill-warning" :style="{width:a.scoreTNTN*10+'%'}"></div></div></td>
+          <td><div class="progress-bg" style="height:8px;width:70px"><div class="progress-fill fill-info"    :style="{width:a.scoreKNGT*10+'%'}"></div></div></td>
+          <td>
+            <div style="display:flex;gap:3px;flex-wrap:wrap">
+              <span class="badge danger" v-for="c in a.topViolations.slice(0,2)" :key="c">{{c}}</span>
+            </div>
+          </td>
+          <td><button class="btn" @click="openAgent(a)">Chi tiết →</button></td>
+        </tr>
+        <tr v-if="filteredAgents.length===0">
+          <td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">Không tìm thấy ĐTV nào</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════ TRAINING ═══════════════════════ -->
+<div v-else-if="tab==='training'" class="page">
+  <div class="toolbar">
+    <select class="select-input" v-model="filterGroup">
+      <option value="">Tất cả nhóm</option>
+      <option value="Nghiệp vụ">Nghiệp vụ</option>
+      <option value="Thái độ">Thái độ</option>
+      <option value="Tinh thần trách nhiệm">Tinh thần trách nhiệm</option>
+      <option value="Kỹ năng giao tiếp">Kỹ năng giao tiếp</option>
+    </select>
+    <select class="select-input" v-model="filterSeverity">
+      <option value="">Tất cả mức độ</option>
+      <option value="critical">Nghiêm trọng ≥30%</option>
+      <option value="warning">Trung bình 10-30%</option>
+      <option value="ok">Thấp &lt;10%</option>
+    </select>
+    <span style="font-size:12px;color:var(--muted);margin-left:auto">Sắp xếp theo tỷ lệ vi phạm (cao → thấp)</span>
+  </div>
+
+  <div style="margin-bottom:12px;padding:12px 16px;background:#EEF6FF;border-left:4px solid var(--accent);border-radius:8px;font-size:13px;color:var(--text)">
+    <b>💡 Cách dùng:</b> Bấm <b>Học ngay</b> để mở tài liệu học tương ứng với từng lỗi vi phạm.
+    CNTT 18001260 → <a :href="DATA.meta.cnttAcademy" target="_blank">cntt-beige.vercel.app</a> (sản phẩm CNTT) |
+    BRCĐ 18001166 → <a :href="DATA.meta.brcdAcademy" target="_blank">1166-academy</a> (quy trình cuộc gọi)
+  </div>
+
+  <div class="training-cards">
+    <div class="tc" v-for="c in filteredTraining" :key="c.id">
+      <div class="tc-header">
+        <span class="tc-id">{{c.id}}</span>
+        <span class="tc-label">{{c.label}}</span>
+        <span class="tc-pct" :class="c.pct>=30?'danger':c.pct>=10?'warning':'success'">{{c.pct.toFixed(1)}}%</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        <span class="badge muted">{{c.group}}</span>
+        <span class="badge remind" v-if="c.reminder">Nhắc nhở</span>
+        <span class="badge danger"  v-if="c.pct>=30">Vi phạm cao</span>
+        <span class="badge warning" v-else-if="c.pct>=10">Trung bình</span>
+        <span class="badge success" v-else>Tỷ lệ thấp</span>
+        <span class="badge info">{{c.violations}} / {{c.applicable}} cuộc</span>
+      </div>
+      <!-- Violation progress bar -->
+      <div class="progress-bg" style="height:6px;margin-bottom:10px">
+        <div class="progress-fill" :class="c.pct>=30?'fill-danger':c.pct>=10?'fill-warning':'fill-success'" :style="{width:Math.min(c.pct,100)+'%'}"></div>
+      </div>
+      <div class="tc-tip" v-if="c.tip">🎯 {{c.tip}}</div>
+      <div class="tc-example" v-if="c.example">"{{c.example}}"</div>
+      <a :href="dataset==='cntt'?c.learnCNTT:c.learnBRCD" target="_blank" class="learn-btn">
+        📚 Học ngay {{dataset==='cntt'?'(CNTT)':'(1166)'}}
+      </a>
+    </div>
+  </div>
+</div>
+
+</div><!-- end #app -->
+
+<script>
+const { createApp, ref, computed, watch, onMounted, nextTick } = Vue;
+
+createApp({
+  setup() {
+    const tab = ref('dashboard');
+    const dataset = ref('cntt');
+    const agentDetail = ref(null);
+    const search = ref('');
+    const filterLoc = ref('');
+    const filterViola = ref('');
+    const filterGroup = ref('');
+    const filterSeverity = ref('');
+    const sortKey = ref('totalViolations');
+    const sortDir = ref(-1);
+
+    let charts = {};
+
+    function destroyChart(id) {
+      if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+    }
+    function destroyAllCharts() {
+      Object.keys(charts).forEach(id => destroyChart(id));
+    }
+
+    const cnttData = computed(() => DATA.cntt);
+    const brcdData = computed(() => DATA.brcd);
+    const activeData = computed(() => dataset.value === 'cntt' ? DATA.cntt : DATA.brcd);
+
+    // Criteria map {id → meta+stats}
+    const criteriaMap = computed(() => {
+      const stat = Object.fromEntries((activeData.value.criteriaStats || []).map(c => [c.id, c]));
+      const result = {};
+      DATA.criteria.forEach(c => {
+        result[c.id] = { ...c, ...(stat[c.id] || {violations:0,applicable:0,pct:0}) };
+      });
+      return result;
+    });
+
+    const topCriteria = computed(() =>
+      [...(activeData.value.criteriaStats || [])].sort((a,b) => b.pct - a.pct)
+    );
+
+    const groupStats = computed(() => {
+      const groups = ['Nghiệp vụ','Thái độ','Tinh thần trách nhiệm','Kỹ năng giao tiếp'];
+      return groups.map(g => ({
+        group: g,
+        items: DATA.criteria
+          .filter(c => c.group === g)
+          .map(c => ({ ...c, ...(criteriaMap.value[c.id] || {}) }))
+      }));
+    });
+
+    const topAgents = computed(() =>
+      [...activeData.value.agents].sort((a,b) => b.totalViolations - a.totalViolations).slice(0,15)
+    );
+
+    const belowThreshold = computed(() =>
+      activeData.value.agents.filter(a => avgScore(a) < 9.5).length
+    );
+
+    const filteredAgents = computed(() => {
+      let list = [...activeData.value.agents];
+      if (search.value.trim()) {
+        const q = search.value.trim().toLowerCase();
+        list = list.filter(a => a.name.toLowerCase().includes(q) || (a.accountId||'').toLowerCase().includes(q));
+      }
+      if (filterLoc.value) list = list.filter(a => a.location === filterLoc.value);
+      if (filterViola.value) {
+        list = list.filter(a => {
+          const r = a.totalViolations / a.totalCalls;
+          if (filterViola.value === 'high') return r >= 0.5;
+          if (filterViola.value === 'mid')  return r >= 0.2 && r < 0.5;
+          return r < 0.2;
+        });
+      }
+      list.sort((a,b) => {
+        let va = a[sortKey.value], vb = b[sortKey.value];
+        if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+        return sortDir.value * (va > vb ? 1 : va < vb ? -1 : 0);
+      });
+      return list;
+    });
+
+    const filteredTraining = computed(() => {
+      return DATA.criteria
+        .map(c => ({ ...c, ...(criteriaMap.value[c.id] || {}) }))
+        .filter(c => {
+          if (filterGroup.value && c.group !== filterGroup.value) return false;
+          if (filterSeverity.value === 'critical' && c.pct < 30)  return false;
+          if (filterSeverity.value === 'warning'  && (c.pct < 10 || c.pct >= 30)) return false;
+          if (filterSeverity.value === 'ok'        && c.pct >= 10) return false;
+          return true;
+        })
+        .sort((a,b) => b.pct - a.pct);
+    });
+
+    function avgScore(a) {
+      const vals = [a.scoreNV, a.scoreTD, a.scoreTNTN, a.scoreKNGT].filter(v => v && v > 0);
+      return vals.length ? vals.reduce((s,v) => s+v, 0) / vals.length : 10;
+    }
+
+    function violClass(viol, calls) {
+      const r = viol / calls;
+      return r >= 0.5 ? 'danger' : r >= 0.2 ? 'warning' : 'success';
+    }
+    function violClass2(a) {
+      const r = a.totalViolations / a.totalCalls;
+      return r >= 0.5 ? 'sp-danger' : r >= 0.2 ? 'sp-warning' : 'sp-success';
+    }
+
+    function sortBy(key) {
+      if (sortKey.value === key) sortDir.value *= -1;
+      else { sortKey.value = key; sortDir.value = -1; }
+    }
+    function sortIcon(key) {
+      if (sortKey.value !== key) return '↕';
+      return sortDir.value === 1 ? '↑' : '↓';
+    }
+
+    function agentCriteriaRows(a) {
+      const cm = criteriaMap.value;
+      return DATA.criteria
+        .map(c => {
+          const viol = (a.criteriaViolations || {})[c.id] || 0;
+          const appl = (a.criteriaApplicable || {})[c.id] || 0;
+          const pct = appl > 0 ? viol / appl * 100 : 0;
+          return { id: c.id, label: c.label, group: c.group, viol, appl, pct,
+            learnUrl: dataset.value === 'cntt' ? c.learnCNTT : c.learnBRCD,
+            tip: c.tip, reminder: c.reminder };
+        })
+        .filter(c => c.appl > 0)
+        .sort((a,b) => b.pct - a.pct);
+    }
+
+    function agentViolRows(a) {
+      return agentCriteriaRows(a);
+    }
+
+    function openAgent(a) {
+      agentDetail.value = a;
+      tab.value = 'agents';
+      nextTick(() => {
+        window.scrollTo(0,0);
+        renderRadar(a);
+      });
+    }
+
+    function agentKey(a) {
+      return (a.accountId || a.name || 'agent').replace(/[^a-z0-9]/gi, '_');
+    }
+
+    function renderRadar(a) {
+      const id = 'radar_' + agentKey(a);
+      destroyChart(id);
+      const el = document.getElementById(id);
+      if (!el) return;
+      charts[id] = new Chart(el, {
+        type: 'radar',
+        data: {
+          labels: ['Nghiệp vụ (NV)', 'Thái độ (TĐ)', 'Tinh thần TN', 'Kỹ năng GT'],
+          datasets: [{
+            label: a.name,
+            data: [a.scoreNV||10, a.scoreTD||10, a.scoreTNTN||10, a.scoreKNGT||10],
+            backgroundColor: 'rgba(23,63,172,.10)',
+            borderColor: '#173FAC',
+            borderWidth: 2,
+            pointBackgroundColor: '#12B3A6',
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: { r: { min: 0, max: 10, ticks: { stepSize: 2, font: { size: 10 } } } },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderDashboardCharts() {
+      destroyChart('barCriteria');
+      destroyChart('donutSat');
+
+      const topC = topCriteria.value.slice(0, 12);
+      const barEl = document.getElementById('barCriteria');
+      if (barEl) {
+        charts['barCriteria'] = new Chart(barEl, {
+          type: 'bar',
+          data: {
+            labels: topC.map(c => `${c.id} (${criteriaMap.value[c.id]?.label || ''})`),
+            datasets: [{
+              label: 'Tỷ lệ vi phạm (%)',
+              data: topC.map(c => c.pct),
+              backgroundColor: topC.map(c => c.pct>=30?'#DC2626':c.pct>=10?'#D97706':'#12B3A6'),
+              borderRadius: 6,
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: {
+              label: ctx => ` ${ctx.raw.toFixed(1)}% (${topC[ctx.dataIndex]?.violations}/${topC[ctx.dataIndex]?.applicable} cuộc)`
+            }}},
+            scales: { x: { max: 100, ticks: { callback: v => v+'%' } }, y: { ticks: { font: { size: 11 } } } }
+          }
+        });
+      }
+
+      const doEl = document.getElementById('donutSat');
+      if (doEl) {
+        const d = activeData.value;
+        charts['donutSat'] = new Chart(doEl, {
+          type: 'doughnut',
+          data: {
+            labels: ['Hài lòng', 'Không hài lòng', 'Không đánh giá'],
+            datasets: [{ data: [d.satCount, d.notSatCount, d.naCount],
+              backgroundColor: ['#12B3A6','#DC2626','#93C5FD'],
+              borderWidth: 2, borderColor: '#FFFFFF' }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } } }
+          }
+        });
+      }
+    }
+
+    function switchDataset(ds) {
+      if (ds === dataset.value) return;
+      dataset.value = ds;
+      agentDetail.value = null;
+      search.value = '';
+      filterLoc.value = '';
+      filterViola.value = '';
+      if (tab.value === 'dashboard') nextTick(renderDashboardCharts);
+    }
+
+    // Watch for tab/dataset changes to re-render charts
+    watch([tab, dataset], ([newTab]) => {
+      if (newTab === 'dashboard') {
+        nextTick(renderDashboardCharts);
+      }
+    });
+
+    onMounted(() => {
+      renderDashboardCharts();
+    });
+
+    return {
+      tab, dataset, agentDetail, search, filterLoc, filterViola, filterGroup, filterSeverity,
+      sortKey, sortDir, cnttData, brcdData, activeData, criteriaMap, topCriteria,
+      groupStats, topAgents, belowThreshold, filteredAgents, filteredTraining,
+      avgScore, violClass, violClass2, sortBy, sortIcon,
+      agentCriteriaRows, agentViolRows, openAgent, switchDataset,
+      DATA,
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
