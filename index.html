@@ -261,26 +261,29 @@ tr:last-child td{border-bottom:none}
 
   <!-- Calls list (CNTT only) -->
   <div class="card" v-if="dataset==='cntt' && agentDetail.calls && agentDetail.calls.length">
-    <div style="font-weight:700;color:var(--primary);margin-bottom:12px">Danh sách cuộc gọi ({{agentDetail.calls.length}} cuộc)</div>
-    <div v-for="(call,i) in agentDetail.calls.slice(0,30)" :key="i" class="call-item" :class="{negative:call.satisfaction==='không hài lòng'}">
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="badge" :class="call.satisfaction==='hài lòng'?'success':call.satisfaction==='không hài lòng'?'danger':'muted'">
-            {{call.satisfaction==='hài lòng'?'😊 Hài lòng':call.satisfaction==='không hài lòng'?'😞 Không HL':'—'}}
-          </span>
-          <span class="call-field">{{call.time}}</span>
-          <span class="call-field" v-if="call.duration">⏱ {{call.duration}}s</span>
-          <a v-if="call.url" :href="call.url" target="_blank" style="font-size:11px;margin-left:auto">🔊 Nghe lại</a>
-        </div>
-        <div class="call-viols" v-if="call.violations && call.violations.length">
-          <span class="badge danger" v-for="v in call.violations" :key="v">{{v}}</span>
-        </div>
-        <div class="call-summary" v-if="call.summary">{{call.summary}}</div>
-        <div class="call-field" style="margin-top:4px" v-if="call.negativeMarkers">⚠ {{call.negativeMarkers}}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-weight:700;color:var(--primary)">Danh sách cuộc gọi ({{agentDetail.calls.length}} cuộc)</div>
+      <div style="display:flex;gap:6px;font-size:12px">
+        <span class="badge danger">😞 {{agentDetail.calls.filter(c=>c.satisfaction==='không hài lòng').length}} Không HL</span>
+        <span class="badge success">😊 {{agentDetail.calls.filter(c=>c.satisfaction==='hài lòng').length}} Hài lòng</span>
       </div>
     </div>
-    <div v-if="agentDetail.calls.length>30" style="text-align:center;padding:12px;font-size:12px;color:var(--muted)">
-      … và {{agentDetail.calls.length-30}} cuộc gọi khác
+    <div v-for="(call,i) in agentDetail.calls" :key="i" class="call-item" :class="{negative:call.satisfaction==='không hài lòng'}">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="badge" :class="call.satisfaction==='hài lòng'?'success':call.satisfaction==='không hài lòng'?'danger':'muted'">
+            {{call.satisfaction==='hài lòng'?'😊 Hài lòng':call.satisfaction==='không hài lòng'?'😞 Không HL':'— Chưa đánh giá'}}
+          </span>
+          <span class="call-field">📅 {{call.time}}</span>
+          <span class="call-field" v-if="call.duration">⏱ {{call.duration}}</span>
+          <a v-if="call.url" :href="call.url" target="_blank" style="font-size:11px;margin-left:auto;display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-weight:600">🔊 Nghe lại</a>
+        </div>
+        <div class="call-viols" v-if="call.violations && call.violations.length">
+          <span class="badge danger" v-for="v in call.violations" :key="v" :title="criteriaMap[v]?.label">{{v}}</span>
+        </div>
+        <div class="call-summary" v-if="call.summary" style="white-space:pre-wrap;word-break:break-word">{{call.summary}}</div>
+        <div v-if="call.negativeMarkers" style="margin-top:4px;font-size:11px;color:var(--danger);background:#fee2e2;padding:4px 8px;border-radius:6px;border-left:3px solid var(--danger)">⚠ {{call.negativeMarkers}}</div>
+      </div>
     </div>
   </div>
 </div>
@@ -420,7 +423,10 @@ tr:last-child td{border-bottom:none}
         <th>Đơn vị</th>
         <th class="sortable" style="text-align:center" @click="sortBy('totalCalls')">Cuộc {{sortIcon('totalCalls')}}</th>
         <th class="sortable" style="text-align:center" @click="sortBy('totalViolations')">Vi phạm {{sortIcon('totalViolations')}}</th>
-        <th>NV</th><th>TĐ</th><th>TNTN</th><th>KNGT</th>
+        <th style="min-width:90px" title="Điểm Nghiệp vụ / 10">NV (Điểm)</th>
+        <th style="min-width:90px" title="Điểm Thái độ / 10">TĐ (Điểm)</th>
+        <th style="min-width:90px" title="Điểm Tinh thần trách nhiệm / 10">TNTN (Điểm)</th>
+        <th style="min-width:90px" title="Điểm Kỹ năng giao tiếp / 10">KNGT (Điểm)</th>
         <th>Lỗi chính</th>
         <th></th>
       </tr></thead>
@@ -432,10 +438,22 @@ tr:last-child td{border-bottom:none}
           <td style="text-align:center">
             <span class="score-pill" :class="violClass2(a)">{{a.totalViolations}}</span>
           </td>
-          <td><div class="progress-bg" style="height:8px;width:70px"><div class="progress-fill fill-success" :style="{width:a.scoreNV*10+'%'}"></div></div></td>
-          <td><div class="progress-bg" style="height:8px;width:70px"><div class="progress-fill fill-info"    :style="{width:a.scoreTD*10+'%'}"></div></div></td>
-          <td><div class="progress-bg" style="height:8px;width:70px"><div class="progress-fill fill-warning" :style="{width:a.scoreTNTN*10+'%'}"></div></div></td>
-          <td><div class="progress-bg" style="height:8px;width:70px"><div class="progress-fill fill-info"    :style="{width:a.scoreKNGT*10+'%'}"></div></div></td>
+          <td>
+            <div class="progress-bg" style="height:6px;width:72px"><div class="progress-fill fill-success" :style="{width:a.scoreNV*10+'%'}"></div></div>
+            <div style="font-size:11px;font-weight:700;color:var(--primary);margin-top:2px">{{a.scoreNV?.toFixed(1) ?? '–'}}<span style="color:var(--muted);font-weight:400">/10</span></div>
+          </td>
+          <td>
+            <div class="progress-bg" style="height:6px;width:72px"><div class="progress-fill fill-info" :style="{width:a.scoreTD*10+'%'}"></div></div>
+            <div style="font-size:11px;font-weight:700;color:var(--primary);margin-top:2px">{{a.scoreTD?.toFixed(1) ?? '–'}}<span style="color:var(--muted);font-weight:400">/10</span></div>
+          </td>
+          <td>
+            <div class="progress-bg" style="height:6px;width:72px"><div class="progress-fill fill-warning" :style="{width:a.scoreTNTN*10+'%'}"></div></div>
+            <div style="font-size:11px;font-weight:700;color:var(--primary);margin-top:2px">{{a.scoreTNTN?.toFixed(1) ?? '–'}}<span style="color:var(--muted);font-weight:400">/10</span></div>
+          </td>
+          <td>
+            <div class="progress-bg" style="height:6px;width:72px"><div class="progress-fill fill-info" :style="{width:a.scoreKNGT*10+'%'}"></div></div>
+            <div style="font-size:11px;font-weight:700;color:var(--primary);margin-top:2px">{{a.scoreKNGT?.toFixed(1) ?? '–'}}<span style="color:var(--muted);font-weight:400">/10</span></div>
+          </td>
           <td>
             <div style="display:flex;gap:3px;flex-wrap:wrap">
               <span class="badge danger" v-for="c in a.topViolations.slice(0,2)" :key="c">{{c}}</span>

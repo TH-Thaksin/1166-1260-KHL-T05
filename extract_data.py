@@ -35,6 +35,15 @@ EXPECTED = {
 
 CNTT_BASE = 'https://cntt-beige.vercel.app'
 ACAD_BASE = 'https://1166-academy-v1-0.vercel.app'
+KB   = ACAD_BASE + '/kien-thuc/kbcg-khung-kich-ban'
+KN   = ACAD_BASE + '/kien-thuc/ky-nang-mem'
+KH   = ACAD_BASE + '/kien-thuc/kbhkh-bao-hong'
+ESC  = ACAD_BASE + '/kien-thuc/escalate-sms-3-muc'
+HG   = ACAD_BASE + '/kien-thuc/hengio-thanh-thai'
+TQ   = ACAD_BASE + '/kien-thuc/tong-quan-1166'
+HT   = ACAD_BASE + '/kien-thuc/he-thong-cong-cu'
+TL   = ACAD_BASE + '/kien-thuc/thanhly-quy-trinh'
+CM   = ACAD_BASE + '/kien-thuc/cam-mesh-tu-van'
 
 CRITERIA_META = {
     '1.1.1': {
@@ -42,200 +51,175 @@ CRITERIA_META = {
         'group': 'Nghiệp vụ', 'reminder': True,
         'tip': 'Phải chào ngay khi nhận máy, giới thiệu đúng cú pháp chuẩn.',
         'example': 'Dạ, Chăm sóc khách hàng VNPT xin nghe ạ',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/tong-quan-1166',
+        'learnCNTT': KB, 'learnBRCD': KB,
     },
     '1.1.2': {
         'label': 'Mời khách hàng nêu yêu cầu',
         'group': 'Nghiệp vụ', 'reminder': True,
         'tip': 'Sau chào hỏi phải mời KH nêu yêu cầu một cách chủ động.',
         'example': 'Em có thể hỗ trợ gì cho Anh/Chị ạ?',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/kbcg-khung-kich-ban',
+        'learnCNTT': KB, 'learnBRCD': KB,
     },
     '1.1.3': {
         'label': 'Xác minh thông tin định danh KH',
         'group': 'Nghiệp vụ', 'reminder': False,
         'tip': 'Xác minh số ĐT, tên, CCCD, mã thuê bao TRƯỚC khi hỗ trợ.',
         'example': 'Anh/Chị cho em xin số điện thoại đăng ký dịch vụ được không ạ?',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/tong-quan-1166',
+        'learnCNTT': KB, 'learnBRCD': TQ,
     },
     '1.1.4': {
         'label': 'Nhận diện khách hàng',
         'group': 'Nghiệp vụ', 'reminder': False,
         'tip': 'Tra cứu thông tin KH từ hệ thống để nhận diện (VIP, lịch sử, loại dịch vụ).',
         'example': 'Em đã kiểm tra thông tin anh/chị, tài khoản đang dùng gói...',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/kbhkh-bao-hong',
+        'learnCNTT': HT, 'learnBRCD': HT,
     },
     '1.1.5': {
         'label': 'Xác định đúng nhu cầu khách hàng',
         'group': 'Nghiệp vụ', 'reminder': False,
         'tip': 'Xác nhận lại nhu cầu trước khi xử lý để tránh hiểu sai.',
         'example': 'Anh/Chị cần em hỗ trợ [vấn đề X] đúng không ạ?',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/tong-quan-1166',
+        'learnCNTT': CM, 'learnBRCD': CM,
     },
     '1.2.1': {
         'label': 'Xác định loại lỗi khách hàng gặp',
         'group': 'Nghiệp vụ', 'reminder': False,
         'tip': 'Phân loại lỗi: kỹ thuật / thao tác / dịch vụ / hệ thống — trước khi xử lý.',
         'example': 'Để em kiểm tra xem lỗi này thuộc về kỹ thuật hay thao tác nhé ạ',
-        'learnCNTT': CNTT_BASE + '/hoc/smartca',
-        'learnBRCD': ACAD_BASE + '/kien-thuc/kbhkh-bao-hong',
+        'learnCNTT': CNTT_BASE, 'learnBRCD': KH,
     },
     '1.2.2': {
         'label': 'Tra cứu thông tin hệ thống nội bộ',
         'group': 'Nghiệp vụ', 'reminder': False,
         'tip': 'Luôn tra cứu hệ thống trước khi trả lời để đảm bảo thông tin chính xác.',
         'example': 'Anh/Chị chờ em kiểm tra thông tin trên hệ thống một chút ạ',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/kbhkh-bao-hong',
+        'learnCNTT': HT, 'learnBRCD': KH,
     },
     '1.2.3': {
         'label': 'Giải quyết ngay hoặc chuyển tuyến sau',
         'group': 'Nghiệp vụ', 'reminder': False,
         'tip': 'Nếu không giải quyết được ngay → chuyển trưởng ca/GQKN. Không để KH chờ vô hạn.',
         'example': 'Em xin chuyển máy sang bộ phận chuyên trách để hỗ trợ anh/chị tốt hơn ạ',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/kbhkh-bao-hong',
+        'learnCNTT': KH, 'learnBRCD': KH,
     },
     '1.2.4': {
         'label': 'Chuyển nội dung cho tuyến sau',
         'group': 'Nghiệp vụ', 'reminder': False,
         'tip': 'Ghi đầy đủ nội dung cần xử lý khi chuyển tuyến sau theo đúng quy trình.',
         'example': 'Em đã ghi nhận yêu cầu và chuyển bộ phận X xử lý cho anh/chị ạ',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/escalate-sms-3-muc',
+        'learnCNTT': ESC, 'learnBRCD': ESC,
     },
     '1.2.5': {
         'label': 'Hẹn thời gian gọi lại cho khách hàng',
         'group': 'Nghiệp vụ', 'reminder': False,
         'tip': 'Luôn xác nhận thời gian dự kiến xử lý CỤ THỂ, không nói chung chung.',
         'example': 'Em hẹn trong vòng 24h làm việc sẽ phản hồi lại anh/chị ạ',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/hengio-thanh-thai',
+        'learnCNTT': HG, 'learnBRCD': HG,
     },
     '1.3.1': {
         'label': 'Hỏi KH cần hỗ trợ thêm (cuối gọi)',
         'group': 'Nghiệp vụ', 'reminder': True,
         'tip': 'Bước bị bỏ qua nhiều nhất! Luôn hỏi TRƯỚC khi kết thúc cuộc gọi.',
         'example': 'Anh/Chị có cần em hỗ trợ thêm vấn đề gì nữa không ạ?',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/kbcg-khung-kich-ban',
+        'learnCNTT': KB, 'learnBRCD': KB,
     },
     '1.3.2': {
         'label': 'Cảm ơn và chào tạm biệt',
         'group': 'Nghiệp vụ', 'reminder': True,
         'tip': 'Kết thúc lịch sự bằng lời cảm ơn trước khi gác máy.',
         'example': 'Cảm ơn anh/chị đã liên hệ VNPT. Chúc anh/chị một ngày tốt lành ạ!',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/kbcg-khung-kich-ban',
+        'learnCNTT': KB, 'learnBRCD': KB,
     },
     '2.1': {
         'label': 'Thái độ tích cực, tôn trọng KH',
         'group': 'Thái độ', 'reminder': False,
         'tip': 'Giữ giọng nói nhẹ nhàng, lịch sự trong suốt cuộc gọi dù KH có bực bội.',
         'example': 'Em rất hiểu sự bất tiện của anh/chị, em sẽ cố gắng giải quyết nhanh nhất',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/ky-nang-mem',
+        'learnCNTT': KN, 'learnBRCD': KN,
     },
     '2.2': {
         'label': 'Chuyên nghiệp với khách hàng khó tính',
         'group': 'Thái độ', 'reminder': False,
         'tip': 'Khi KH gay gắt → giữ bình tĩnh, không phản bác, không thay đổi giọng điệu.',
         'example': 'Em hiểu anh/chị đang rất bức xúc, em xin lỗi về sự bất tiện này',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/ky-nang-mem',
+        'learnCNTT': KN, 'learnBRCD': KN,
     },
     '2.3': {
         'label': 'Khách hàng phàn nàn thái độ ĐTV',
         'group': 'Thái độ', 'reminder': False,
         'tip': 'Vi phạm nghiêm trọng. Không để KH yêu cầu chuyển lãnh đạo vì thái độ.',
         'example': None,
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/ky-nang-mem',
+        'learnCNTT': KN, 'learnBRCD': KN,
     },
     '3.1': {
         'label': 'Cam kết trách nhiệm bằng lời',
         'group': 'Tinh thần trách nhiệm', 'reminder': False,
         'tip': 'Dùng từ ngữ cam kết CỤ THỂ, không nói chung chung.',
         'example': 'Em sẽ kiểm tra ngay và gọi lại cho anh/chị trong vòng 30 phút',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/kbcg-khung-kich-ban',
+        'learnCNTT': KB, 'learnBRCD': KB,
     },
     '3.2': {
         'label': 'Xử lý/chuyển tiếp + cập nhật tình hình',
         'group': 'Tinh thần trách nhiệm', 'reminder': False,
         'tip': 'Khi bộ phận khác đang xử lý → chủ động cập nhật tiến độ cho KH.',
         'example': 'Hiện tại bộ phận kỹ thuật đang xử lý, dự kiến hoàn thành lúc...',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/escalate-sms-3-muc',
+        'learnCNTT': TL, 'learnBRCD': TL,
     },
     '3.3': {
         'label': 'Giải thích rõ khi KH không nghe/hiểu',
         'group': 'Tinh thần trách nhiệm', 'reminder': False,
         'tip': 'Khi KH không hiểu → kiên nhẫn giải thích lại theo cách khác, không lặp y nguyên.',
         'example': 'Để em giải thích lại theo cách khác ạ, anh/chị vui lòng...',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/kbcg-khung-kich-ban',
+        'learnCNTT': KN, 'learnBRCD': KN,
     },
     '3.4': {
         'label': 'Chủ động giải thích khi KH không hài lòng',
         'group': 'Tinh thần trách nhiệm', 'reminder': False,
         'tip': 'Khi KH bày tỏ không hài lòng → chủ động giải thích nguyên nhân và hướng giải quyết.',
         'example': 'Em hiểu anh/chị chưa hài lòng, để em giải thích rõ hơn về...',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/ky-nang-mem',
+        'learnCNTT': KN, 'learnBRCD': KN,
     },
     '4.1': {
         'label': 'Dùng từ ngữ thể hiện sự cảm thông',
         'group': 'Kỹ năng giao tiếp', 'reminder': False,
         'tip': 'Thường xuyên dùng: "Dạ", "Vâng", "Em hiểu ạ", "Em xin lỗi", "Em rất tiếc".',
         'example': 'Dạ, em hoàn toàn hiểu sự bất tiện của anh/chị ạ',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/kbcg-khung-kich-ban',
+        'learnCNTT': KN, 'learnBRCD': KB,
     },
     '4.2': {
         'label': 'Ngôn ngữ lịch sự, xưng hô phù hợp',
         'group': 'Kỹ năng giao tiếp', 'reminder': False,
         'tip': 'Xưng "em", gọi KH là "anh/chị". Không dùng từ địa phương không phổ thông.',
         'example': 'Dạ thưa anh/chị, em xin...',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/ky-nang-mem',
+        'learnCNTT': KN, 'learnBRCD': KN,
     },
     '4.3': {
         'label': 'Ngắt lời không nói "xin lỗi/xin phép"',
         'group': 'Kỹ năng giao tiếp', 'reminder': False,
         'tip': 'Khi cần ngắt lời phải nói "Em xin phép" hoặc "Xin lỗi anh/chị" trước.',
         'example': 'Em xin phép được bổ sung thêm thông tin ạ...',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/ky-nang-mem',
+        'learnCNTT': KN, 'learnBRCD': KN,
     },
     '4.4': {
         'label': 'Thông báo khi yêu cầu khách hàng chờ',
         'group': 'Kỹ năng giao tiếp', 'reminder': False,
         'tip': 'Khi cần tra cứu hoặc chuyển máy → thông báo trước và xin phép KH.',
         'example': 'Anh/Chị vui lòng chờ em khoảng 30 giây để tra cứu thông tin ạ',
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/ky-nang-mem',
+        'learnCNTT': KB, 'learnBRCD': KN,
     },
     '4.5': {
         'label': 'Diễn đạt ngắn gọn, không dùng từ địa phương',
         'group': 'Kỹ năng giao tiếp', 'reminder': False,
         'tip': 'Nói ngắn gọn, rõ ràng. Tránh từ địa phương khó hiểu hoặc biệt ngữ nội bộ.',
         'example': None,
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/kbcg-khung-kich-ban',
+        'learnCNTT': KN, 'learnBRCD': KB,
     },
     '4.6': {
         'label': 'Lặp lại thông tin không cần thiết',
         'group': 'Kỹ năng giao tiếp', 'reminder': False,
         'tip': 'Chỉ nhắc lại thông tin khi KH yêu cầu hoặc cần xác nhận. Không lặp đi lặp lại.',
         'example': None,
-        'learnCNTT': CNTT_BASE,
-        'learnBRCD': ACAD_BASE + '/kien-thuc/ky-nang-mem',
+        'learnCNTT': KN, 'learnBRCD': KN,
     },
 }
 
@@ -328,7 +312,7 @@ def process_csv(filepath, include_calls=True, hotline_filter=None):
                     pass
 
             if include_calls:
-                summary = (row.get('Tóm tắt hội thoại') or '').replace('\n', ' ').strip()[:200]
+                summary = (row.get('Tóm tắt hội thoại') or '').replace('\n', ' ').strip()[:600]
                 a['calls'].append({
                     'id':       row.get('ID cuộc gọi', ''),
                     'time':     row.get('Thời điểm cuộc gọi', ''),
