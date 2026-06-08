@@ -320,7 +320,7 @@ def process_csv(filepath, include_calls=True, hotline_filter=None):
                     'satisfaction': sat,
                     'url':      row.get('URL', ''),
                     'summary':  summary,
-                    'negativeMarkers': (row.get('Dấu hiệu tiêu cực') or '')[:100],
+                    'negativeMarkers': (row.get('Dấu hiệu tiêu cực') or '').replace('\n', ' ↵ ').strip()[:500],
                     'violations': call_viols,
                 })
 
